@@ -17,4 +17,9 @@ router.get("/login", (req: Request, res: Response) => {
   res.render("login", { title: "Sign In - Todo App" });
 });
 
+// Render the authenticated dashboard view
+router.get("/dashboard", (req: Request, res: Response) => {
+  res.render("todos", { title: "Your Dashboard - Todo App" });
+});
+
 export default router;

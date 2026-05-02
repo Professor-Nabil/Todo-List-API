@@ -1,0 +1,185 @@
+<div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+  <h1 style="color: #cba6f7; margin: 0;">Your Tasks</h1>
+  <button id="logoutBtn" style="background-color: #f38ba8; color: #11111b; font-weight: bold; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Logout</button>
+</div>
+
+<div style="background-color: #313244; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #45475a;">
+  <h3 style="margin-top: 0; color: #a6e3a1;">Create a New Task</h3>
+  <form id="createTodoForm" style="text-align: left;">
+    <label for="title" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Title</label>
+    <input type="text" id="title" name="title" required placeholder="What needs to be done?" 
+           style="width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; background-color: #1e1e2e; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+    <label for="description" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Description</label>
+    <input type="text" id="description" name="description" required placeholder="Add more context..." 
+           style="width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; background-color: #1e1e2e; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+    <button type="submit" class="btn" style="border: none; cursor: pointer; font-size: 1rem; background-color: #a6e3a1;">Add Task</button>
+  </form>
+</div>
+
+<div id="todoList">
+  <p style="color: #a6adc8;">Loading tasks...</p>
+</div>
+
+<script>
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  const loadTodos = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/todos', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const payload = await res.json();
+      const todoList = document.getElementById('todoList');
+      
+      if (payload.data && payload.data.length > 0) {
+        let html = '';
+        for (let i = 0; i < payload.data.length; i++) {
+          const todo = payload.data[i];
+          html += `
+            <div id="todo-row-${todo.id}" style="background-color: #313244; padding: 1.2rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #45475a; text-align: left;">
+              <div id="todo-content-${todo.id}" style="flex: 1;">
+                <h4 id="todo-title-${todo.id}" style="margin: 0 0 0.25rem 0; color: #cba6f7;">${todo.title}</h4>
+                <p id="todo-desc-${todo.id}" style="margin: 0; color: #a6adc8; font-size: 0.9rem;">${todo.description}</p>
+              </div>
+              <div id="todo-actions-${todo.id}" style="display: flex; gap: 0.5rem; margin-left: 1rem;">
+                <button onclick="toggleEditMode(${todo.id})" style="background-color: #f9e2af; color: #11111b; font-weight: bold; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">Edit</button>
+                <button onclick="deleteTodo(${todo.id})" style="background-color: #f38ba8; color: #11111b; font-weight: bold; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">Delete</button>
+              </div>
+            </div>
+          `;
+        }
+        todoList.innerHTML = html;
+      } else {
+        todoList.innerHTML = '<p style="color: #a6adc8;">No tasks found. Add your first task above!</p>';
+      }
+    } catch (err) {
+      document.getElementById('todoList').innerHTML = '<p style="color: #f38ba8;">Error loading tasks. Please try again later.</p>';
+    }
+  };
+
+  const toggleEditMode = (id) => {
+    const currentTitle = document.getElementById('todo-title-' + id).innerText;
+    const currentDesc = document.getElementById('todo-desc-' + id).innerText;
+
+    // Convert display area to editable inputs
+    document.getElementById('todo-content-' + id).innerHTML = `
+      <input type="text" id="edit-title-${id}" value="${currentTitle}" style="width: 95%; padding: 0.4rem; margin-bottom: 0.4rem; background-color: #1e1e2e; border: 1px solid #45475a; color: #cdd6f4; border-radius: 4px;">
+      <input type="text" id="edit-desc-${id}" value="${currentDesc}" style="width: 95%; padding: 0.4rem; background-color: #1e1e2e; border: 1px solid #45475a; color: #cdd6f4; border-radius: 4px;">
+    `;
+
+    // Swap buttons to Save / Cancel
+    document.getElementById('todo-actions-' + id).innerHTML = `
+      <button onclick="saveEdit(${id})" style="background-color: #a6e3a1; color: #11111b; font-weight: bold; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">Save</button>
+      <button onclick="loadTodos()" style="background-color: #45475a; color: #cdd6f4; font-weight: bold; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">Cancel</button>
+    `;
+  };
+
+  const saveEdit = async (id) => {
+    const title = document.getElementById('edit-title-' + id).value;
+    const description = document.getElementById('edit-desc-' + id).value;
+    const token = getAuthToken();
+
+    if (!token) return;
+
+    try {
+      const res = await fetch('/todos/' + id, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ title, description })
+      });
+
+      if (res.ok) {
+        await loadTodos();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Failed to update task');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    }
+  };
+
+  document.getElementById('createTodoForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const token = getAuthToken();
+
+    if (!token) {
+      alert('Authentication token missing. Please sign in again.');
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ title, description })
+      });
+
+      if (res.ok) {
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        await loadTodos();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || errorData.error || 'Failed to create task');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    }
+  });
+
+  const deleteTodo = async (id) => {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch('/todos/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (res.ok) {
+        await loadTodos();
+      } else {
+        alert('Failed to delete task');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    }
+  };
+
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.href = '/login';
+  });
+
+  loadTodos();
+</script>
