@@ -26,14 +26,14 @@ Set up the multi-table relational schema with explicit ownership constraints.
 
 Write and isolate all business queries for both Users and Todos using Prisma.
 
-- [ ] **Commit 2: Create User & Authentication Services**
+- [x] **Commit 2: Create User & Authentication Services**
   - Create `src/services/userService.ts`:
     - `createUser(data)`: Hashes passwords with `bcrypt` and stores the user.
     - `getUserByEmail(email)`: Retrieves a user by their unique email.
     - `getUserById(id)`: Fetches user details.
   - Create Vitest tests to guarantee password hashing and unique email storage work.
 
-- [ ] **Commit 3: Create Todo CRUD & Pagination Services**
+- [x] **Commit 3: Create Todo CRUD & Pagination Services**
   - Create `src/services/todoService.ts`:
     - `createTodo(userId, data)`: Creates a todo tied to the specific user.
     - `getTodoById(id)`: Retrieves a specific todo.
