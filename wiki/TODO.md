@@ -48,7 +48,7 @@ Write and isolate all business queries for both Users and Todos using Prisma.
 
 Add parsing, endpoint logic, JWT validation, and input verification.
 
-- [ ] **Commit 4: Auth Controllers & JWT Validation Middleware**
+- [x] **Commit 4: Auth Controllers & JWT Validation Middleware**
   - Implement Zod validation schemas for registration and login requests.
   - Write authentication controllers (`POST /register`, `POST /login`) that sign JWTs.
   - Create the authentication middleware to intercept HTTP requests, decode the `Bearer` token, and attach the user ID to `req.user`.
