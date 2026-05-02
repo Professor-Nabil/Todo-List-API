@@ -13,7 +13,7 @@ strict data ownership authorization, paginated lists, and security measures.
 
 Set up the multi-table relational schema with explicit ownership constraints.
 
-- [ ] **Commit 1: Setup Prisma, Database Schema, and Initial Migration**
+- [x] **Commit 1: Setup Prisma, Database Schema, and Initial Migration**
   - Configure the database connection in `.env`.
   - Create the `User` model (`id`, `name`, `email`, `passwordHash`, `createdAt`).
   - Create the `Todo` model (`id`, `title`, `description`, `userId`, `createdAt`, `updatedAt`).
