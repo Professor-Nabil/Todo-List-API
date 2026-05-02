@@ -12,4 +12,9 @@ router.get("/register", (req: Request, res: Response) => {
   res.render("register", { title: "Register - Todo App" });
 });
 
+// Render the login page
+router.get("/login", (req: Request, res: Response) => {
+  res.render("login", { title: "Sign In - Todo App" });
+});
+
 export default router;

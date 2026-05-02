@@ -1,0 +1,47 @@
+<h1 style="color: #cba6f7;">Sign In</h1>
+<p style="margin-bottom: 1.5rem;">Welcome back! Please enter your details</p>
+
+<form id="loginForm" style="text-align: left;">
+  <label for="email" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Email Address</label>
+  <input type="email" id="email" name="email" required placeholder="you@example.com" 
+         style="width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; background-color: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+  <label for="password" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Password</label>
+  <input type="password" id="password" name="password" required placeholder="••••••••" 
+         style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; background-color: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+  <button type="submit" class="btn" style="border: none; cursor: pointer; font-size: 1rem;">Continue</button>
+</form>
+
+<a href="/register" class="btn btn-alt" style="margin-top: 0.8rem;">Need an account? Register here</a>
+
+<script>
+  document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Store the token in both localStorage and cookies for future requests
+        localStorage.setItem('token', data.token);
+        document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Redirect directly to the dashboard
+        window.location.href = '/dashboard';
+      } else {
+        alert(data.error || 'Authentication failed. Please check your credentials.');
+      }
+    } catch (err) {
+      alert('Network error. Please try again later.');
+    }
+  });
+</script>
