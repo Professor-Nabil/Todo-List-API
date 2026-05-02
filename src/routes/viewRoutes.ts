@@ -7,4 +7,9 @@ router.get("/", (req: Request, res: Response) => {
   res.render("home", { title: "Home - Todo App" });
 });
 
+// Render the register page
+router.get("/register", (req: Request, res: Response) => {
+  res.render("register", { title: "Register - Todo App" });
+});
+
 export default router;

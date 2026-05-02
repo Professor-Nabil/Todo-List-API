@@ -1,0 +1,52 @@
+<h1 style="color: #cba6f7;">Register</h1>
+<p style="margin-bottom: 1.5rem;">Create an account to get started</p>
+
+<form id="registerForm" style="text-align: left;">
+  <label for="name" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Full Name</label>
+  <input type="text" id="name" name="name" required placeholder="John Doe" 
+         style="width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; background-color: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+  <label for="email" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Email Address</label>
+  <input type="email" id="email" name="email" required placeholder="you@example.com" 
+         style="width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; background-color: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+  <label for="password" style="color: #a6adc8; display: block; margin-bottom: 0.25rem;">Password</label>
+  <input type="password" id="password" name="password" required placeholder="••••••••" 
+         style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; background-color: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 6px; box-sizing: border-box;">
+
+  <button type="submit" class="btn" style="border: none; cursor: pointer; font-size: 1rem;">Create Account</button>
+</form>
+
+<a href="/login" class="btn btn-alt" style="margin-top: 0.8rem;">Already have an account? Sign in</a>
+
+<script>
+  document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Store the token in both localStorage and as a direct browser cookie
+        localStorage.setItem('token', data.token);
+        document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Redirect directly to the dashboard
+        window.location.href = '/dashboard';
+      } else {
+        alert(data.error || 'Registration failed. Please check your inputs.');
+      }
+    } catch (err) {
+      alert('Network error. Please try again later.');
+    }
+  });
+</script>
