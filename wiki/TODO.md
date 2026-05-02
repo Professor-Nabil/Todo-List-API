@@ -53,7 +53,7 @@ Add parsing, endpoint logic, JWT validation, and input verification.
   - Write authentication controllers (`POST /register`, `POST /login`) that sign JWTs.
   - Create the authentication middleware to intercept HTTP requests, decode the `Bearer` token, and attach the user ID to `req.user`.
 
-- [ ] **Commit 5: Todo HTTP Request Handlers**
+- [x] **Commit 5: Todo HTTP Request Handlers**
   - Write validation schemas for creating and updating todo items.
   - Build route handlers for `POST /todos`, `PUT /todos/:id`, `DELETE /todos/:id`, and `GET /todos`.
   - Implement strict route-level authorization (returning `403 Forbidden` if a user attempts to update or delete a todo belonging to another user).
